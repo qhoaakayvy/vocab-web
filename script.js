@@ -1,7 +1,19 @@
+// Lấy danh sách từ đã lưu
 const vocabList = JSON.parse(localStorage.getItem("vocabList") || "[]");
 renderTable();
 
-// Tự động điền thông tin khi nhập từ tiếng Anh
+// Hàm dịch nghĩa sang tiếng Việt (dùng API miễn phí)
+async function translateToVietnamese(text) {
+  try {
+    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|vi`);
+    const data = await res.json();
+    return data.responseData.translatedText;
+  } catch (e) {
+    return text; // fallback nếu có lỗi
+  }
+}
+
+// Khi người dùng nhập từ tiếng Anh và chuyển focus
 document.getElementById("word").addEventListener("blur", async function () {
   const word = this.value.trim();
   if (!word) return;
@@ -15,15 +27,19 @@ document.getElementById("word").addEventListener("blur", async function () {
     const data = await res.json();
     const first = data[0];
 
-    typeInput.value = first.meanings[0]?.partOfSpeech || "";
-    meaningInput.value = first.meanings[0]?.definitions[0]?.definition || "";
-    exampleInput.value = first.meanings[0]?.definitions[0]?.example || "";
+    const partOfSpeech = first.meanings[0]?.partOfSpeech || "";
+    const definition = first.meanings[0]?.definitions[0]?.definition || "";
+    const example = first.meanings[0]?.definitions[0]?.example || "";
+
+    typeInput.value = partOfSpeech;
+    exampleInput.value = example;
+    meaningInput.value = await translateToVietnamese(definition);
   } catch (e) {
     console.log("Không tìm thấy từ.");
   }
 });
 
-// Thêm từ
+// Nút "Thêm từ"
 document.getElementById("add-btn").addEventListener("click", function () {
   const word = document.getElementById("word").value.trim();
   const type = document.getElementById("type").value.trim();
@@ -38,7 +54,7 @@ document.getElementById("add-btn").addEventListener("click", function () {
   vocabList.push({ word, type, meaning, example });
   localStorage.setItem("vocabList", JSON.stringify(vocabList));
 
-  // Xóa form
+  // Xóa input
   document.getElementById("word").value = "";
   document.getElementById("type").value = "";
   document.getElementById("meaning").value = "";
@@ -47,7 +63,7 @@ document.getElementById("add-btn").addEventListener("click", function () {
   renderTable();
 });
 
-// Hiển thị bảng từ
+// Hiển thị danh sách từ
 function renderTable() {
   const tbody = document.querySelector("tbody");
   tbody.innerHTML = "";
@@ -72,14 +88,14 @@ function renderTable() {
   }
 }
 
-// Xóa từ
+// Xóa từ khỏi danh sách
 function removeWord(index) {
   vocabList.splice(index, 1);
   localStorage.setItem("vocabList", JSON.stringify(vocabList));
   renderTable();
 }
 
-// Tạo đoạn văn học thuật
+// Tạo đoạn văn học thuật từ các từ đã lưu
 document.getElementById("generate-story").addEventListener("click", function () {
   if (vocabList.length === 0) {
     alert("Bạn chưa có từ nào để luyện tập.");
@@ -96,13 +112,3 @@ document.getElementById("generate-story").addEventListener("click", function () 
 
   document.getElementById("story-output").innerHTML = highlighted;
 });
-// Hàm dịch tiếng Anh → Tiếng Việt bằng Google Translate (không chính thức)
-async function translateToVietnamese(text) {
-  try {
-    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|vi`);
-    const data = await res.json();
-    return data.responseData.translatedText;
-  } catch (e) {
-    return text; // fallback nếu lỗi
-  }
-}
