@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vocabulary Review</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>📚 Daily Vocabulary Trainer</h1>
+
+  <!-- Form nhập từ -->
+  <form id="vocab-form">
+    <input type="text" id="word" placeholder="Từ vựng" required>
+    <input type="text" id="type" placeholder="Loại từ (noun, verb...)" required>
+    <input type="text" id="meaning" placeholder="Nghĩa tiếng Việt" required>
+    <input type="text" id="example" placeholder="Ví dụ ngắn" required>
+    <button type="submit">➕ Thêm từ</button>
+  </form>
+
+  <!-- Bảng từ vựng -->
+  <table id="vocab-table">
+    <thead>
+      <tr>
+        <th>Từ</th>
+        <th>Loại từ</th>
+        <th>Nghĩa</th>
+        <th>Ví dụ</th>
+        <th>Xóa</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Tạo đoạn văn -->
+  <h2>✍️ Tạo đoạn văn học thuật</h2>
+  <button id="generate-story">Tạo đoạn văn từ từ đã học</button>
+  <div id="story-output"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
