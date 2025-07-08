@@ -1,19 +1,29 @@
-// Lấy danh sách từ đã lưu
 const vocabList = JSON.parse(localStorage.getItem("vocabList") || "[]");
 renderTable();
 
-// Hàm dịch nghĩa sang tiếng Việt (dùng API miễn phí)
+// 🌐 Dịch tiếng Anh sang tiếng Việt
 async function translateToVietnamese(text) {
   try {
     const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|vi`);
     const data = await res.json();
     return data.responseData.translatedText;
   } catch (e) {
-    return text; // fallback nếu có lỗi
+    return text;
   }
 }
 
-// Khi người dùng nhập từ tiếng Anh và chuyển focus
+// 🧠 Tạo ví dụ nếu không có sẵn
+function generateExample(word, type) {
+  if (type.includes("verb")) {
+    return `She decided to ${word} everything before moving.`;
+  } else if (type.includes("noun")) {
+    return `The ${word} was discussed at the meeting.`;
+  } else {
+    return `This phrase: "${word}" is often used in English.`;
+  }
+}
+
+// 📥 Khi blur ô nhập từ
 document.getElementById("word").addEventListener("blur", async function () {
   const word = this.value.trim();
   if (!word) return;
@@ -25,21 +35,31 @@ document.getElementById("word").addEventListener("blur", async function () {
   try {
     const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
     const data = await res.json();
-    const first = data[0];
 
-    const partOfSpeech = first.meanings[0]?.partOfSpeech || "";
-    const definition = first.meanings[0]?.definitions[0]?.definition || "";
-    const example = first.meanings[0]?.definitions[0]?.example || "";
+    if (Array.isArray(data)) {
+      const first = data[0];
+      const partOfSpeech = first.meanings[0]?.partOfSpeech || "phrase";
+      const definition = first.meanings[0]?.definitions[0]?.definition || word;
+      const example = first.meanings[0]?.definitions[0]?.example || generateExample(word, partOfSpeech);
 
-    typeInput.value = partOfSpeech;
-    exampleInput.value = example;
-    meaningInput.value = await translateToVietnamese(definition);
+      typeInput.value = partOfSpeech;
+      meaningInput.value = await translateToVietnamese(definition);
+      exampleInput.value = example;
+    } else {
+      // ❗ Không có trong dictionary → tự sinh
+      typeInput.value = "phrase";
+      meaningInput.value = await translateToVietnamese(word);
+      exampleInput.value = generateExample(word, "phrase");
+    }
   } catch (e) {
-    console.log("Không tìm thấy từ.");
+    // ❗ Có lỗi → fallback luôn
+    typeInput.value = "phrase";
+    meaningInput.value = await translateToVietnamese(word);
+    exampleInput.value = generateExample(word, "phrase");
   }
 });
 
-// Nút "Thêm từ"
+// ➕ Thêm từ
 document.getElementById("add-btn").addEventListener("click", function () {
   const word = document.getElementById("word").value.trim();
   const type = document.getElementById("type").value.trim();
@@ -54,7 +74,6 @@ document.getElementById("add-btn").addEventListener("click", function () {
   vocabList.push({ word, type, meaning, example });
   localStorage.setItem("vocabList", JSON.stringify(vocabList));
 
-  // Xóa input
   document.getElementById("word").value = "";
   document.getElementById("type").value = "";
   document.getElementById("meaning").value = "";
@@ -63,7 +82,7 @@ document.getElementById("add-btn").addEventListener("click", function () {
   renderTable();
 });
 
-// Hiển thị danh sách từ
+// 🧾 Hiển thị bảng từ
 function renderTable() {
   const tbody = document.querySelector("tbody");
   tbody.innerHTML = "";
@@ -75,27 +94,25 @@ function renderTable() {
       <td>${item.type}</td>
       <td>${item.meaning}</td>
       <td>${item.example}</td>
-      <td><button onclick="removeWord(${index})">Xóa</button></td>
+      <td><button onclick="removeWord(${index})">❌</button></td>
     `;
     tbody.appendChild(row);
   });
 
   const message = document.getElementById("story-message");
-  if (vocabList.length === 0) {
-    message.innerHTML = `<div class="message">Bạn chưa có từ nào để luyện tập.</div>`;
-  } else {
-    message.innerHTML = "";
-  }
+  message.innerHTML = vocabList.length === 0
+    ? `<div class="message">Bạn chưa có từ nào để luyện tập.</div>`
+    : "";
 }
 
-// Xóa từ khỏi danh sách
+// ❌ Xoá từ
 function removeWord(index) {
   vocabList.splice(index, 1);
   localStorage.setItem("vocabList", JSON.stringify(vocabList));
   renderTable();
 }
 
-// Tạo đoạn văn học thuật từ các từ đã lưu
+// ✍️ Tạo đoạn văn học thuật
 document.getElementById("generate-story").addEventListener("click", function () {
   if (vocabList.length === 0) {
     alert("Bạn chưa có từ nào để luyện tập.");
@@ -103,7 +120,7 @@ document.getElementById("generate-story").addEventListener("click", function () 
   }
 
   const words = vocabList.map(item => item.word);
-  const story = `In a distant land, people traded ${words.join(", ")} as if they were treasures. These words carried power, meaning, and stories of cultures long past.`;
+  const story = `In modern academic discussions, terms like ${words.join(", ")} are frequently used to convey complex ideas in concise ways.`;
 
   const highlighted = words.reduce((text, w) => {
     const regex = new RegExp(`\\b(${w})\\b`, "gi");
