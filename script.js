@@ -96,3 +96,13 @@ document.getElementById("generate-story").addEventListener("click", function () 
 
   document.getElementById("story-output").innerHTML = highlighted;
 });
+// Hàm dịch tiếng Anh → Tiếng Việt bằng Google Translate (không chính thức)
+async function translateToVietnamese(text) {
+  try {
+    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|vi`);
+    const data = await res.json();
+    return data.responseData.translatedText;
+  } catch (e) {
+    return text; // fallback nếu lỗi
+  }
+}
