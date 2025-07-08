@@ -1,24 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Vocabulary Review</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Vocabulary Trainer</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>📚 Daily Vocabulary Trainer</h1>
 
-  <!-- Form nhập từ -->
-  <form id="vocab-form">
-    <input type="text" id="word" placeholder="Từ vựng" required>
-    <input type="text" id="type" placeholder="Loại từ (noun, verb...)" required>
-    <input type="text" id="meaning" placeholder="Nghĩa tiếng Việt" required>
-    <input type="text" id="example" placeholder="Ví dụ ngắn" required>
-    <button type="submit">➕ Thêm từ</button>
-  </form>
+  <div class="input-group">
+    <input id="word" placeholder="Từ tiếng Anh" />
+    <input id="type" placeholder="Loại từ (noun, verb...)" />
+    <input id="meaning" placeholder="Nghĩa tiếng Việt" />
+    <input id="example" placeholder="Ví dụ ngắn" />
+    <button id="add-btn">➕ Thêm từ</button>
+  </div>
 
-  <!-- Bảng từ vựng -->
-  <table id="vocab-table">
+  <table>
     <thead>
       <tr>
         <th>Từ</th>
@@ -31,11 +30,12 @@
     <tbody></tbody>
   </table>
 
-  <!-- Tạo đoạn văn -->
   <h2>✍️ Tạo đoạn văn học thuật</h2>
   <button id="generate-story">Tạo đoạn văn từ từ đã học</button>
-  <div id="story-output"></div>
+  <div id="story-message"></div>
+  <div id="story-output" class="story-box"></div>
 
   <script src="script.js"></script>
 </body>
+</html>
 </html>
